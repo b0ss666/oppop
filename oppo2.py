@@ -240,6 +240,27 @@ class MeasurementManager:
         """
         return len(self.measurements) == 0
 
+    def save_to_file(self, filename: str) -> bool:
+        """Сохраняет все измерения в текстовый файл.
+
+        Args:
+            filename: Имя файла для сохранения
+
+        Returns:
+            True если сохранение успешно, иначе False
+        """
+        try:
+            with open(filename, 'w', encoding='utf-8') as file:
+                file.write("Дата         | Высота   | Давление\n")
+                file.write("-" * 36 + "\n")
+                for measurement in self.measurements:
+                    file.write(str(measurement) + "\n")
+                file.write("-" * 36)
+            return True
+        except Exception as e:
+            print(f"Ошибка при сохранении файла: {e}")
+            return False
+
 
 def handle_add_measurement(manager: MeasurementManager, ui: UserInterface) -> None:
     """Обрабатывает добавление нового измерения.
@@ -299,6 +320,24 @@ def handle_show_top5(manager: MeasurementManager, ui: UserInterface) -> None:
         ui.print_table(top5)
 
 
+def handle_save_to_file(manager: MeasurementManager, ui: UserInterface) -> None:
+    """Обрабатывает сохранение данных в файл.
+
+    Args:
+        manager: Менеджер измерений
+        ui: Пользовательский интерфейс
+    """
+    if manager.is_empty():
+        ui.show_message("Нет данных для сохранения.")
+        return
+
+    filename = ui.get_user_input("Введите имя файла для сохранения: ")
+    if manager.save_to_file(filename):
+        ui.show_message(f"Данные успешно сохранены в файл '{filename}'")
+    else:
+        ui.show_error("Не удалось сохранить данные в файл.")
+
+
 def handle_exit(manager: MeasurementManager, ui: UserInterface) -> bool:
     """Обрабатывает выход из программы.
 
@@ -324,6 +363,7 @@ def create_menu() -> Dict[str, MenuItem]:
         "2": MenuItem("2", "Показать все измерения", handle_show_all),
         "3": MenuItem("3", "Отсортировать по дате", handle_sort_by_date),
         "4": MenuItem("4", "ТОП-5 максимальных давлений", handle_show_top5),
+        "5": MenuItem("5", "Сохранить данные в файл", handle_save_to_file),
         "0": MenuItem("0", "Выход", handle_exit)
     }
     return menu_items

@@ -1,0 +1,81 @@
+@startuml
+' Настройки стиля
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+' Определение классов
+class PressureMeasurement {
+    - date: str
+    - height: float
+    - value: int
+    + {static} DATE_FORMAT: str
+    + {static} TABLE_HEADER: str
+    + {static} TABLE_SEPARATOR: str
+    + __init__(date, height, value)
+    - _validate()
+    + date_as_datetime(): datetime
+    + __str__(): str
+    + __repr__(): str
+}
+
+class PressureParser {
+    - {static} _PATTERN: str
+    + {static} parse(input_str: str): PressureMeasurement
+    - {static} _validate_format(input_str: str)
+    - {static} _extract_values(input_str: str)
+    - {static} _validate_date(date: str)
+}
+
+class UserInterface {
+    + {static} show_header()
+    + {static} print_table(measurements)
+    + {static} get_user_input(prompt: str): str
+    + {static} show_message(message: str)
+    + {static} show_error(message: str)
+}
+
+class MeasurementManager {
+    - _measurements
+    + {static} DEFAULT_TOP_N: int
+    + __init__()
+    + add_measurement(measurement: PressureMeasurement)
+    + get_all()
+    + sort_by_date()
+    + get_top_n(n: int = 5)
+    + is_empty(): bool
+    + save_to_file(filename: str): bool
+    + clear()
+}
+
+class Application {
+    - manager: MeasurementManager
+    - ui: UserInterface
+    - menu_items
+    - running: bool
+    + __init__()
+    - _create_menu()
+    - _display_menu()
+    - _handle_add_measurement()
+    - _handle_show_all()
+    - _handle_sort_by_date()
+    - _handle_show_top()
+    - _handle_save_to_file()
+    - _handle_clear()
+    - _handle_exit()
+    - _process_user_choice(choice: str)
+    + run()
+}
+
+' Определение связей (исправленный синтаксис)
+PressureParser .down.> PressureMeasurement : <<create>>
+MeasurementManager o-- PressureMeasurement : contains
+Application *-- MeasurementManager : contains
+Application *-- UserInterface : contains
+Application .left.> PressureParser : uses
+Application .right.> PressureMeasurement : uses
+UserInterface .up.> PressureMeasurement : uses
+
+@enduml
